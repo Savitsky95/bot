@@ -1,30 +1,71 @@
 const TelegramBot = require('node-telegram-bot-api');
 
-// Вставьте сюда ваш токен
+// Вставьте свой токен
 const token = '7262257493:AAFMAWxf9CN21DT3GP7HWm4lYw3pItQvURc';
-
-// Создайте бота и подключитесь к Telegram
 const bot = new TelegramBot(token, { polling: true });
 
-// Обработка команды /start
+// Слушаем сообщения
 bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
-  bot.sendMessage(chatId, 'Привет! Я ваш бот. Как я могу помочь?');
+    const chatId = msg.chat.id;
+    const options = {
+        reply_markup: {
+            keyboard: [
+                ['ТО', 'ВТМ']
+            ],
+            one_time_keyboard: true
+        }
+    };
+    bot.sendMessage(chatId, 'Виберіть тип розрахунку:', options);
 });
 
-// Обработка текстовых сообщений
-bot.on('message', (msg) => {
-  const chatId = msg.chat.id;
-  const text = msg.text;
+bot.onText(/ТО|ВТМ/, (msg, match) => {
+    const chatId = msg.chat.id;
+    const type = match[0];
+    bot.sendMessage(chatId, `Введіть план для ${type}`);
+    bot.once('message', (msg) => {
+        const plan = parseFloat(msg.text);
+        bot.sendMessage(chatId, `Введіть факт для ${type}`);
+        bot.once('message', (msg) => {
+            const fact = parseFloat(msg.text);
 
-  // Пример расчета (замените на ваш расчет)
-  if (text === 'Расчет ТО') {
-    const result = 'Результат расчета ТО';
-    bot.sendMessage(chatId, `Результат расчета ТО: ${result}`);
-  } else if (text === 'Расчет ВТМ') {
-    const result = 'Результат расчета ВТМ';
-    bot.sendMessage(chatId, `Результат расчета ВТМ: ${result}`);
-  }
+            if (isNaN(plan) || isNaN(fact)) {
+                bot.sendMessage(chatId, 'Введіть числові значення.');
+                return;
+            }
+
+            let percentage, remaining100, remaining95, daily100, daily95;
+            
+            if (type === 'ТО') {
+                percentage = (fact / plan) * 100;
+                remaining100 = plan - fact;
+                remaining95 = (95 / 100) * plan - fact;
+                const daysInMonth = 30; // Предполагаемое количество дней в месяце
+                daily100 = remaining100 / daysInMonth;
+                daily95 = remaining95 / daysInMonth;
+                
+                bot.sendMessage(chatId, `Процент виконання плану: ${percentage.toFixed(2)}%`);
+                bot.sendMessage(chatId, `Залишилось до 100%: ${remaining100.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Залишилось до 95%: ${remaining95.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Сума продажів на день до 100%: ${daily100.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Сума продажів на день до 95%: ${daily95.toFixed(2)} грн`);
+            } else if (type === 'ВТМ') {
+                percentage = (fact / plan) * 100;
+                remaining100 = plan - fact;
+                remaining98 = (98 / 100) * plan - fact;
+                const daysInMonth = 30; // Предполагаемое количество дней в месяце
+                daily100 = remaining100 / daysInMonth;
+                daily98 = remaining98 / daysInMonth;
+
+                bot.sendMessage(chatId, `Процент виконання плану: ${percentage.toFixed(2)}%`);
+                bot.sendMessage(chatId, `Залишилось до 100%: ${remaining100.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Залишилось до 98%: ${remaining98.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Сума продажів на день до 100%: ${daily100.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Сума продажів на день до 98%: ${daily98.toFixed(2)} грн`);
+            }
+        });
+    });
 });
 
-console.log('Бот запущен');
+bot.on('polling_error', (error) => {
+    console.error(error);
+});
