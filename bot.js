@@ -33,34 +33,37 @@ bot.onText(/ТО|ВТМ/, (msg, match) => {
                 return;
             }
 
-            let percentage, remaining100, remaining95, daily100, daily95;
-            
-            if (type === 'ТО') {
-                percentage = (fact / plan) * 100;
-                remaining100 = plan - fact;
-                remaining95 = (95 / 100) * plan - fact;
-                const daysInMonth = 30; // Предполагаемое количество дней в месяце
-                daily100 = remaining100 / daysInMonth;
-                daily95 = remaining95 / daysInMonth;
-                
-                bot.sendMessage(chatId, `Процент виконання плану: ${percentage.toFixed(2)}%`);
-                bot.sendMessage(chatId, `Залишилось до 100%: ${remaining100.toFixed(2)} грн`);
-                bot.sendMessage(chatId, `Залишилось до 95%: ${remaining95.toFixed(2)} грн`);
-                bot.sendMessage(chatId, `Сума продажів на день до 100%: ${daily100.toFixed(2)} грн`);
-                bot.sendMessage(chatId, `Сума продажів на день до 95%: ${daily95.toFixed(2)} грн`);
-            } else if (type === 'ВТМ') {
-                percentage = (fact / plan) * 100;
-                remaining100 = plan - fact;
-                remaining98 = (98 / 100) * plan - fact;
-                const daysInMonth = 30; // Предполагаемое количество дней в месяце
-                daily100 = remaining100 / daysInMonth;
-                daily98 = remaining98 / daysInMonth;
+            let percentage, remaining100, remainingTarget, daily100, dailyTarget;
+            const daysInMonth = 30; // Предполагаемое количество дней в месяце
 
-                bot.sendMessage(chatId, `Процент виконання плану: ${percentage.toFixed(2)}%`);
-                bot.sendMessage(chatId, `Залишилось до 100%: ${remaining100.toFixed(2)} грн`);
-                bot.sendMessage(chatId, `Залишилось до 98%: ${remaining98.toFixed(2)} грн`);
-                bot.sendMessage(chatId, `Сума продажів на день до 100%: ${daily100.toFixed(2)} грн`);
-                bot.sendMessage(chatId, `Сума продажів на день до 98%: ${daily98.toFixed(2)} грн`);
+            if (fact >= plan) {
+                bot.sendMessage(chatId, 'Ти впорався!');
+            } else {
+                if (type === 'ТО') {
+                    percentage = (fact / plan) * 100;
+                    remaining100 = plan - fact;
+                    remainingTarget = (95 / 100) * plan - fact;
+                    daily100 = remaining100 / daysInMonth;
+                    dailyTarget = remainingTarget / daysInMonth;
+
+                    bot.sendMessage(chatId, `Процент виконання плану: ${percentage.toFixed(2)}%`);
+                    bot.sendMessage(chatId, `Залишилось до 100%: ${remaining100.toFixed(2)} грн`);
+                    bot.sendMessage(chatId, `Залишилось до 95%: ${remainingTarget.toFixed(2)} грн`);
+                    bot.sendMessage(chatId, `Сума продажів на день до 100%: ${daily100.toFixed(2)} грн`);
+                    bot.sendMessage(chatId, `Сума продажів на день до 95%: ${dailyTarget.toFixed(2)} грн`);
+                } else if (type === 'ВТМ') {
+                    percentage = (fact / plan) * 100;
+                    remaining100 = plan - fact;
+                    remainingTarget = (98 / 100) * plan - fact;
+                    daily100 = remaining100 / daysInMonth;
+                    dailyTarget = remainingTarget / daysInMonth;
+
+                    bot.sendMessage(chatId, `Процент виконання плану: ${percentage.toFixed(2)}%`);
+                    bot.sendMessage(chatId, `Залишилось до 100%: ${remaining100.toFixed(2)} грн`);
+                    bot.sendMessage(chatId, `Залишилось до 98%: ${remainingTarget.toFixed(2)} грн`);
+                    bot.sendMessage(chatId, `Сума продажів на день до 100%: ${daily100.toFixed(2)} грн`);
+                    bot.sendMessage(chatId, `Сума продажів на день до 98%: ${dailyTarget.toFixed(2)} грн`);
+                }
             }
         });
     });
