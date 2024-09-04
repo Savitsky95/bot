@@ -33,33 +33,46 @@ bot.onText(/ТО|ВТМ/, (msg, match) => {
                 return;
             }
 
-            let percentage, remaining100, remainingTarget, daily100, dailyTarget;
+            let percentage, remaining100, remainingTarget, daily100, dailyTarget, daily100WithToday, dailyTargetWithToday;
             const daysInMonth = 30; // Предполагаемое количество дней в месяце
+            const remainingDays = 30; // Предполагаемое количество оставшихся дней в месяце
 
             if (type === 'ТО') {
                 percentage = (fact / plan) * 100;
                 remaining100 = Math.max(plan - fact, 0);
                 remainingTarget = Math.max((95 / 100) * plan - fact, 0);
-                daily100 = remaining100 / daysInMonth;
-                dailyTarget = remainingTarget / daysInMonth;
+
+                daily100 = remaining100 / remainingDays;
+                dailyTarget = remainingTarget / remainingDays;
+
+                daily100WithToday = remaining100 / (remainingDays - 1);
+                dailyTargetWithToday = remainingTarget / (remainingDays - 1);
 
                 bot.sendMessage(chatId, `Процент виконання плану: ${percentage.toFixed(2)}%`);
                 bot.sendMessage(chatId, `Залишилось до 100%: ${remaining100.toFixed(2)} грн`);
                 bot.sendMessage(chatId, `Залишилось до 95%: ${remainingTarget.toFixed(2)} грн`);
-                bot.sendMessage(chatId, `Сума продажів на день до 100%: ${daily100.toFixed(2)} грн`);
-                bot.sendMessage(chatId, `Сума продажів на день до 95%: ${dailyTarget.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Сума продажів на день до 100% (без урахування сьогодні): ${daily100.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Сума продажів на день до 95% (без урахування сьогодні): ${dailyTarget.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Сума продажів на день до 100% (з урахуванням сьогодні): ${daily100WithToday.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Сума продажів на день до 95% (з урахуванням сьогодні): ${dailyTargetWithToday.toFixed(2)} грн`);
             } else if (type === 'ВТМ') {
                 percentage = (fact / plan) * 100;
                 remaining100 = Math.max(plan - fact, 0);
                 remainingTarget = Math.max((98 / 100) * plan - fact, 0);
-                daily100 = remaining100 / daysInMonth;
-                dailyTarget = remainingTarget / daysInMonth;
+
+                daily100 = remaining100 / remainingDays;
+                dailyTarget = remainingTarget / remainingDays;
+
+                daily100WithToday = remaining100 / (remainingDays - 1);
+                dailyTargetWithToday = remainingTarget / (remainingDays - 1);
 
                 bot.sendMessage(chatId, `Процент виконання плану: ${percentage.toFixed(2)}%`);
                 bot.sendMessage(chatId, `Залишилось до 100%: ${remaining100.toFixed(2)} грн`);
                 bot.sendMessage(chatId, `Залишилось до 98%: ${remainingTarget.toFixed(2)} грн`);
-                bot.sendMessage(chatId, `Сума продажів на день до 100%: ${daily100.toFixed(2)} грн`);
-                bot.sendMessage(chatId, `Сума продажів на день до 98%: ${dailyTarget.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Сума продажів на день до 100% (без урахування сьогодні): ${daily100.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Сума продажів на день до 98% (без урахування сьогодні): ${dailyTarget.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Сума продажів на день до 100% (з урахуванням сьогодні): ${daily100WithToday.toFixed(2)} грн`);
+                bot.sendMessage(chatId, `Сума продажів на день до 98% (з урахуванням сьогодні): ${dailyTargetWithToday.toFixed(2)} грн`);
             }
         });
     });
