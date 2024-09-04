@@ -10,7 +10,8 @@ bot.onText(/\/start/, (msg) => {
     const options = {
         reply_markup: {
             keyboard: [
-                ['ТО', 'ВТМ']
+                ['ТО', 'ВТМ'],
+                ['Перезапустити бот']
             ],
             resize_keyboard: true,
             one_time_keyboard: false
@@ -26,7 +27,8 @@ bot.onText(/ТО|ВТМ/, (msg, match) => {
     const options = {
         reply_markup: {
             keyboard: [
-                ['ТО', 'ВТМ']
+                ['ТО', 'ВТМ'],
+                ['Перезапустити бот']
             ],
             resize_keyboard: true,
             one_time_keyboard: false
@@ -36,7 +38,7 @@ bot.onText(/ТО|ВТМ/, (msg, match) => {
         .catch(error => console.error('Error sending plan request:', error));
 
     bot.once('message', (msg) => {
-        if (msg.text === '/start' || msg.text === 'ТО' || msg.text === 'ВТМ') {
+        if (msg.text === '/start' || msg.text === 'ТО' || msg.text === 'ВТМ' || msg.text === 'Перезапустити бот') {
             return; // Игнорировать сообщения, которые не являются планом
         }
 
@@ -110,6 +112,27 @@ bot.onText(/ТО|ВТМ/, (msg, match) => {
             }
         });
     });
+});
+
+// Обработка кнопки перезапуска бота
+bot.onText(/Перезапустити бот/, (msg) => {
+    const chatId = msg.chat.id;
+    const options = {
+        reply_markup: {
+            keyboard: [
+                ['ТО', 'ВТМ'],
+                ['Перезапустити бот']
+            ],
+            resize_keyboard: true,
+            one_time_keyboard: false
+        }
+    };
+
+    bot.sendMessage(chatId, 'Бот перезапущено. Виберіть тип розрахунку:', options)
+        .catch(error => console.error('Error sending restart message:', error));
+    
+    // Перезапуск бота
+    process.exit(0); // Завершить текущий процесс, чтобы PM2 или другой процесс-менеджер автоматически перезапустил его
 });
 
 bot.on('polling_error', (error) => {
