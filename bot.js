@@ -34,6 +34,7 @@ bot.onText(/ТО|ВТМ/, (msg, match) => {
     };
     bot.sendMessage(chatId, `Введіть план для ${type}`, options)
         .catch(error => console.error('Error sending plan request:', error));
+
     bot.once('message', (msg) => {
         if (msg.text === '/start' || msg.text === 'ТО' || msg.text === 'ВТМ') {
             return; // Игнорировать сообщения, которые не являются планом
@@ -42,6 +43,7 @@ bot.onText(/ТО|ВТМ/, (msg, match) => {
         const plan = parseFloat(msg.text);
         bot.sendMessage(chatId, `Введіть факт для ${type}`, options)
             .catch(error => console.error('Error sending fact request:', error));
+
         bot.once('message', (msg) => {
             const fact = parseFloat(msg.text);
 
@@ -53,7 +55,7 @@ bot.onText(/ТО|ВТМ/, (msg, match) => {
 
             let percentage, remaining100, remainingTarget, daily100, dailyTarget, daily100WithToday, dailyTargetWithToday;
             const daysInMonth = 30; // Предполагаемое количество дней в месяце
-            const remainingDays = 30; // Предполагаемое количество оставшихся дней в месяце
+            const remainingDays = daysInMonth - new Date().getDate(); // Количество оставшихся дней в месяце
 
             if (type === 'ТО') {
                 percentage = (fact / plan) * 100;
@@ -63,8 +65,8 @@ bot.onText(/ТО|ВТМ/, (msg, match) => {
                 daily100 = remaining100 / remainingDays;
                 dailyTarget = remainingTarget / remainingDays;
 
-                daily100WithToday = remaining100 / (remainingDays - 1);
-                dailyTargetWithToday = remainingTarget / (remainingDays - 1);
+                daily100WithToday = remaining100 / (remainingDays + 1);
+                dailyTargetWithToday = remainingTarget / (remainingDays + 1);
 
                 bot.sendMessage(chatId, `Процент виконання плану: ${percentage.toFixed(2)}%`, options)
                     .catch(error => console.error('Error sending percentage message:', error));
@@ -88,8 +90,8 @@ bot.onText(/ТО|ВТМ/, (msg, match) => {
                 daily100 = remaining100 / remainingDays;
                 dailyTarget = remainingTarget / remainingDays;
 
-                daily100WithToday = remaining100 / (remainingDays - 1);
-                dailyTargetWithToday = remainingTarget / (remainingDays - 1);
+                daily100WithToday = remaining100 / (remainingDays + 1);
+                dailyTargetWithToday = remainingTarget / (remainingDays + 1);
 
                 bot.sendMessage(chatId, `Процент виконання плану: ${percentage.toFixed(2)}%`, options)
                     .catch(error => console.error('Error sending percentage message:', error));
