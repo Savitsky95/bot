@@ -1,7 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 // Вставьте свой токен
-const token = '7262257493:AAFMAWxf9CN21DT3GP7HWm4lYw3pItQvURc';
+const token = 'Y7262257493:AAFMAWxf9CN21DT3GP7HWm4lYw3pItQvURc';
 const bot = new TelegramBot(token, { polling: true });
 
 const options = {
@@ -25,28 +25,38 @@ bot.onText(/\/start/, (msg) => {
 bot.onText(/ТО|ВТМ/, (msg, match) => {
     const chatId = msg.chat.id;
     const type = match[0];
+    askForPlan(chatId, type);
+});
+
+function askForPlan(chatId, type) {
     bot.sendMessage(chatId, `Введіть план для ${type}:`, options);
-    
+
     bot.once('message', (msg) => {
         if (isCommand(msg.text)) return; // Игнорировать команды
         const plan = parseFloat(msg.text);
         if (isNaN(plan)) {
-            return bot.sendMessage(chatId, 'Введіть числові значення.', options);
+            return bot.sendMessage(chatId, 'Введіть числові значення.', options)
+                .then(() => askForPlan(chatId, type)); // Повторный запрос ввода плана
         }
-        
-        bot.sendMessage(chatId, `Введіть факт для ${type}:`, options);
-        
-        bot.once('message', (msg) => {
-            if (isCommand(msg.text)) return; // Игнорировать команды
-            const fact = parseFloat(msg.text);
-            if (isNaN(fact)) {
-                return bot.sendMessage(chatId, 'Введіть числові значення.', options);
-            }
-            
-            calculateAndSendResult(chatId, type, plan, fact);
-        });
+
+        askForFact(chatId, type, plan);
     });
-});
+}
+
+function askForFact(chatId, type, plan) {
+    bot.sendMessage(chatId, `Введіть факт для ${type}:`, options);
+
+    bot.once('message', (msg) => {
+        if (isCommand(msg.text)) return; // Игнорировать команды
+        const fact = parseFloat(msg.text);
+        if (isNaN(fact)) {
+            return bot.sendMessage(chatId, 'Введіть числові значення.', options)
+                .then(() => askForFact(chatId, type, plan)); // Повторный запрос ввода факта
+        }
+
+        calculateAndSendResult(chatId, type, plan, fact);
+    });
+}
 
 // Функция для расчета и отправки результата
 function calculateAndSendResult(chatId, type, plan, fact) {
@@ -82,8 +92,7 @@ function isCommand(text) {
 bot.onText(/Перезапустити бот/, (msg) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 'Бот перезапущено. Виберіть тип розрахунку:', options)
-        .then(() => process.exit(0))
-        .catch(error => console.error('Error sending restart message:', error));
+        .then(() => bot.emit('text', { chat: { id: chatId }, text: '/start' }));
 });
 
 // Обработка ошибок
