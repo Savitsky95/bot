@@ -1,3 +1,4 @@
+const http = require('http');
 const TelegramBot = require('node-telegram-bot-api');
 
 // Вставьте свой токен
@@ -98,4 +99,13 @@ bot.onText(/Перезапустити бот/, (msg) => {
 // Обработка ошибок
 bot.on('polling_error', (error) => {
     console.error('Polling error:', error);
+});
+
+// Создаем HTTP сервер для Heroku
+const port = process.env.PORT || 3000;
+http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Bot is running\n');
+}).listen(port, () => {
+    console.log(`Server is running on port ${port}`);
 });
