@@ -1,8 +1,8 @@
 const http = require('http');
 const TelegramBot = require('node-telegram-bot-api');
 
-// Вставьте свой токен
-const token = 'Y7262257493:AAFMAWxf9CN21DT3GP7HWm4lYw3pItQvURc';
+// Получаем токен из переменной окружения
+const token = process.env.TELEGRAM_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
 const options = {
@@ -61,19 +61,17 @@ function askForFact(chatId, type, plan) {
 
 // Функция для расчета и отправки результата
 function calculateAndSendResult(chatId, type, plan, fact) {
-    let percentage, remaining100, remainingTarget, daily100, dailyTarget, daily100WithToday, dailyTargetWithToday;
     const daysInMonth = 30;
     const remainingDays = daysInMonth - new Date().getDate();
-
-    percentage = (fact / plan) * 100;
-    remaining100 = Math.max(plan - fact, 0);
+    const percentage = (fact / plan) * 100;
+    const remaining100 = Math.max(plan - fact, 0);
     const target = (type === 'ТО') ? 95 : 98;
-    remainingTarget = Math.max((target / 100) * plan - fact, 0);
+    const remainingTarget = Math.max((target / 100) * plan - fact, 0);
 
-    daily100 = remaining100 / remainingDays;
-    dailyTarget = remainingTarget / remainingDays;
-    daily100WithToday = remaining100 / (remainingDays + 1);
-    dailyTargetWithToday = remainingTarget / (remainingDays + 1);
+    const daily100 = remaining100 / remainingDays;
+    const dailyTarget = remainingTarget / remainingDays;
+    const daily100WithToday = remaining100 / (remainingDays + 1);
+    const dailyTargetWithToday = remainingTarget / (remainingDays + 1);
 
     bot.sendMessage(chatId, `Процент виконання плану: ${percentage.toFixed(2)}%`, options);
     bot.sendMessage(chatId, `Залишилось до 100%: ${remaining100.toFixed(2)} грн`, options);
@@ -93,12 +91,14 @@ function isCommand(text) {
 bot.onText(/Перезапустити бот/, (msg) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 'Бот перезапущено. Виберіть тип розрахунку:', options)
-        .then(() => bot.emit('text', { chat: { id: chatId }, text: '/start' }));
+        .then(() => bot.processUpdate({ message: { chat: { id: chatId }, text: '/start' } }));
 });
 
 // Обработка ошибок
 bot.on('polling_error', (error) => {
-    console.error('Polling error:', error);
+    if (error.code !== 'EFATAL') {
+        console.error('Polling error:', error.code, error.response.body); // Логи только при критических ошибках
+    }
 });
 
 // Создаем HTTP сервер для Heroku
